@@ -1,1 +1,4 @@
 nav:
+    - Home: index.md
+    - About: sampleADR.md
+theme: readthedocs
