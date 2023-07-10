@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>GCS - GenArch ADR's</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "GCS";
+        var mkdocs_page_input_path = "Sample-GCS-ADR.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <script src="../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> GenArch ADR's
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="./">GCS</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#context">Context</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#decision">Decision</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#consequences">Consequences</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#compliance">Compliance</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#adr-changelog">ADR Changelog</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">GenArch ADR's</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
+      <li>GCS</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="google-cloud-storage">Google Cloud Storage</h1>
+<p>This documents defines the approach to select Google services based on specific organization requirements.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Author</th>
+<th align="left">Status</th>
+<th align="left">Version</th>
+<th align="left">Date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Jane Doe</td>
+<td align="left">Accepted</td>
+<td align="left">0.1</td>
+<td align="left">11-06-2023</td>
+</tr>
+</tbody>
+</table>
+<p><br></p>
+<h2 id="context">Context</h2>
+<hr />
+<p>Google Cloud Storage (GCS) is a service for storing your objects in Google Cloud. An object is an immutable piece of data consisting of a file of any format. You store objects in containers called buckets. All buckets are associated with a project, and you can group your projects under an organization. 
+GCS provides several storage classes that enable a consumer to choose the right balance of access frequency against cost. More frequently accessed storage has a higher storage cost but lower access charge, while less frequently accessed data has a lower storage charge and higher access charges.</p>
+<h2 id="decision">Decision</h2>
+<hr />
+<ul>
+<li>Need for an immutable compliant storage on the cloud to store regulatory related files and encrypt using customer managed encryption key (CMEK).</li>
+<li>The storage solution must be simple, scalable and can be accessed through APIs.</li>
+</ul>
+<p>Usecases: 
+- Media content storage and delivery. Geo-redundant storage with the highest level of availability.
+- Backups and archives.
+- durable storage for static websites.
+- Integrated repository for analytics and ML.</p>
+<p>GCS Object storage solution has a unique position with application transformation. GCS offers API level access on data storage for different storage requirements. GCS is tightly integrated with GCE, GKE, database services and git. </p>
+<p>It is recommend GCS Object storage as one of the storage solution options. </p>
+<h2 id="consequences">Consequences</h2>
+<hr />
+<p>Pros or Capabilities:</p>
+<ul>
+<li>Key Functional Capabilities for Google Cloud Storage can be found <a href="https://cloud.google.com/storage#section-9">here</a>.</li>
+</ul>
+<p>Cons or Service Limitations:</p>
+<ul>
+<li>
+<p>The resource locations Organization Policy Service constraint controls the ability to create regional resources. When regional resource are created, testing should be carried out for new policy on non-production projects and folders.</p>
+</li>
+<li>
+<p>GCS Services explicitly to be used by Terraform Module for Prod/UAT and Development environment.</p>
+</li>
+<li>
+<p>Cloud Storage 5TB object size limit. Cloud Storage supports a maximum single-object size up 5 terabytes. If you have objects larger than 5TB, the object transfer fails for those objects for either Cloud Storage or Storage Transfer Service.</p>
+</li>
+<li>
+<p>Limit &amp; Quotas about cloud Storage can be found <a href="https://cloud.google.com/storage/quotas">here</a></p>
+</li>
+</ul>
+<h2 id="compliance">Compliance</h2>
+<hr />
+<ul>
+<li>Encryption At Rest</li>
+</ul>
+<p>All Cloud Storage data are automatically stored in an encrypted state, but you can also provide your own encryption keys. For more information, see Cloud Storage Encryption.</p>
+<ul>
+<li>
+<p>Encrypt your Cloud Storage data with Cloud KMS</p>
+</li>
+<li>
+<p>Turn on uniform bucket-level access and its org policy.</p>
+</li>
+<li>
+<p>Enforce the domain-restricted sharing constraint in an organization policy to prevent accidental public data sharing, or sharing beyond your organization.</p>
+</li>
+<li>
+<p>Audit your Cloud Storage data with Cloud Audit Logging.</p>
+</li>
+<li>
+<p>Secure your data with VPC Service Controls.</p>
+</li>
+</ul>
+<p>&nbsp;</p>
+<h4 id="adr-changelog">ADR Changelog</h4>
+<hr />
+<table>
+<thead>
+<tr>
+<th align="left">Change Description</th>
+<th align="left">Version</th>
+<th align="left">Date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">Initial proposed version</td>
+<td align="left">0.1</td>
+<td align="left">11-06-2023</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href=".." class="btn btn-neutral float-left" title="Home"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href=".." style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
