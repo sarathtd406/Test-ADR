@@ -83,7 +83,7 @@ def parse_markdown(file_path):
             parsed_data['Data Classification'][f"DC-{classification}"] = risk_rating
     
     # Extract service status
-    service_status_section = re.search(r'## Service Status\s*\n\| Service Status \|\s*\n\|:--\|\s*\n\|([^\|]+)\|', content)
+    service_status_section = re.search(r'## Service Status\s*\n\| Service Status \|\s*\n\|---\|\s*\n\|([^\|]+)\|', content)
 
     if service_status_section:
         parsed_data['Service Status'] = service_status_section.group(1).strip()
