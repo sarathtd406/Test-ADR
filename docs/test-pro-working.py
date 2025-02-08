@@ -117,3 +117,30 @@ def parse_markdown(file_path):
     df = df.applymap(lambda x: 'Check with CPA team' if pd.isna(x) or x == '' else x)
     
     return df
+
+def main():
+    # Specify the markdown file path
+    file_path = 'sample_markdown_file.md'  # Update with the actual file path
+    
+    # Check if file exists
+    if not os.path.exists(file_path):
+        print(f"Error: The file {file_path} does not exist.")
+        return
+    
+    try:
+        # Parse the markdown file and get the DataFrame
+        df = parse_markdown(file_path)
+        
+        # Show the resulting dataframe (or save it to a file)
+        print(df)
+        
+        # Optionally, save to CSV
+        df.to_csv('parsed_output.csv', index=False)
+        print("Output saved to 'parsed_output.csv'")
+    
+    except Exception as e:
+        print(f"Error while processing the markdown file: {e}")
+
+# Entry point of the program
+if __name__ == "__main__":
+    main()
