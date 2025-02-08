@@ -22,12 +22,12 @@ def parse_markdown(file_path):
     content = remove_comments(content)
     
     parsed_data = {
-        'Title': '',
-        'Document Owner': [],
-        'Document Owner Id': [],
+        'Service Name': '',
+        'Service Owner': [],
+        'Service Owner Id': [],
         'Service Status': '',
         'ADR Authors': [],
-        'ADR Latest Approved Date': '',
+        'Latest Approval date': '',
         'Capability Mapping Hierarchy': [],
         'Data Classification': {}
     }
@@ -35,7 +35,7 @@ def parse_markdown(file_path):
     # Extract title
     title_match = re.search(r'^---\ntitle:\s*(.*?)\n---', content, re.DOTALL)
     if title_match:
-        parsed_data['Title'] = title_match.group(1).strip()
+        parsed_data['Service Name'] = title_match.group(1).strip()
 
     # Extract document owner and contributors
     document_owner_match = re.search(r'## Document Owner\s*\n([\s\S]*?)(?=##|$)', content)
@@ -45,8 +45,8 @@ def parse_markdown(file_path):
             owner = owner.lstrip('-').strip()
             match = re.match(r'(.+?)\s<(.+?)>', owner)
             if match:
-                parsed_data['Document Owner'].append(match.group(1))
-                parsed_data['Document Owner Id'].append(match.group(2))
+                parsed_data['Service Owner'].append(match.group(1))
+                parsed_data['Service Owner Id'].append(match.group(2))
     
     authors_match = re.search(r'## Author/Contributors\s*\n([\s\S]*?)(?=##|$)', content)
     if authors_match:
@@ -56,9 +56,9 @@ def parse_markdown(file_path):
             parsed_data['ADR Authors'].append(author)
     
     # Extract document status and approval date
-    doc_status_match = re.search(r'## Document Status\s*\n\|Document Status\|Forum\| Date \|\s*\n\|:--\|:--\|:--\|\s*\n\|([^\|]+)\|([^\|]+)\|([^\|]+)\|', content)
+    doc_status_match = re.search(r'## Document Status\s*\n\| Document Status \| Forum \| Date \|\s*\n\|:--\|:--\|:--\|\s*\n\|([^\|]+)\|([^\|]+)\|([^\|]+)\|', content)
     if doc_status_match:
-        parsed_data['ADR Latest Approved Date'] = doc_status_match.group(3).strip()
+        parsed_data['Latest Approval date'] = doc_status_match.group(3).strip()
     
     # Extract capability mapping hierarchy
     capability_mapping_section = re.search(r'## 1\. Capability Mapping Hierarchy\s*\n([\s\S]*?)(?=##|$)', content)
@@ -90,24 +90,24 @@ def parse_markdown(file_path):
     
     # Prepare DataFrame from parsed data
     data = {
-        'Title': [parsed_data['Title']],
-        'Document Owner': [', '.join(parsed_data['Document Owner'])],
-        'Document Owner Id': [', '.join(parsed_data['Document Owner Id'])],
+        'Service Name': [parsed_data['Service Name']],
+        'Service Owner': [', '.join(parsed_data['Service Owner'])],
+        'Service Owner Id': [', '.join(parsed_data['Service Owner Id'])],
         'Service Status': [parsed_data['Service Status']],
         'ADR Authors': ['; '.join(parsed_data['ADR Authors'])],
-        'ADR Latest Approved Date': [parsed_data['ADR Latest Approved Date']],
+        'Latest Approval date': [parsed_data['Latest Approval date']],
     }
     
     df = pd.DataFrame(data)
     capability_df = pd.DataFrame(parsed_data['Capability Mapping Hierarchy'])
     if not capability_df.empty:
         main_data = pd.DataFrame({
-            'Title': [parsed_data['Title']] * len(capability_df),
-            'Document Owner': [', '.join(parsed_data['Document Owner'])] * len(capability_df),
-            'Document Owner Id': [', '.join(parsed_data['Document Owner Id'])] * len(capability_df),
+            'Service Name': [parsed_data['Service Name']] * len(capability_df),
+            'Service Owner': [', '.join(parsed_data['Service Owner'])] * len(capability_df),
+            'Service Owner Id': [', '.join(parsed_data['Service Owner Id'])] * len(capability_df),
             'Service Status': [parsed_data['Service Status']] * len(capability_df),
             'ADR Authors': ['; '.join(parsed_data['ADR Authors'])] * len(capability_df),
-            'ADR Latest Approved Date': [parsed_data['ADR Latest Approved Date']] * len(capability_df)
+            'Latest Approval date': [parsed_data['Latest Approval date']] * len(capability_df)
         })
         df = pd.concat([main_data, capability_df], axis=1)
     
@@ -117,23 +117,23 @@ def parse_markdown(file_path):
         df = pd.concat([df, classification_df], axis=1)
     
     # Add dummy date and check for missing values
-    if parsed_data['ADR Latest Approved Date']:
+    if parsed_data['Latest Approval date']:
         try:
-            if parsed_data['ADR Latest Approved Date'] in ["TBD", "dd-mm-yyyy", ""]:
-                parsed_data['ADR Latest Approved Date'] = "00-00-0000"
+            if parsed_data['Latest Approval date'] in ["TBD", "dd-mm-yyyy", ""]:
+                parsed_data['Latest Approval date'] = "00-00-0000"
             
-            latest_approved_date = datetime.strptime(parsed_data['ADR Latest Approved Date'], '%d-%m-%Y')
+            latest_approved_date = datetime.strptime(parsed_data['Latest Approval date'], '%d-%m-%Y')
             recertify_due_date = latest_approved_date + relativedelta(months=10)
             recertify_due_date_str = recertify_due_date.strftime('%d-%m-%Y')
         except Exception as e:
             print(f"Error while calculating Re-certify Due Date: {e}")
-            parsed_data['ADR Latest Approved Date'] = "00-00-0000"
+            parsed_data['Latest Approval date'] = "00-00-0000"
             recertify_due_date_str = "00-00-0000"
         
         # Update the DataFrame with dummy date if necessary
         df['Re-certify Due Date'] = recertify_due_date_str
     else:
-        parsed_data['ADR Latest Approved Date'] = "00-00-0000"
+        parsed_data['Latest Approval date'] = "00-00-0000"
         recertify_due_date_str = "00-00-0000"
         df['Re-certify Due Date'] = recertify_due_date_str
     
@@ -144,7 +144,7 @@ def parse_markdown(file_path):
 
 def main():
     # Specify the folder containing the markdown files
-    folder_path = 'markdown_files'  # Update with the actual folder path containing markdown files
+    folder_path = 'sample.md'  # Update with the actual folder path containing markdown files
     
     # List all markdown files in the folder
     markdown_files = [f for f in os.listdir(folder_path) if f.endswith('.md')]
