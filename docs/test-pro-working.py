@@ -10,7 +10,7 @@ def remove_comments(content):
     [comment]: <> (This is a comment)
     <!-- This is a comment -->
     """
-    content = re.sub(r'\[comment\]: <> \(.*?\)', '', content, flags=re.IGNORECASE)  # Remove inline comments, case-insensitive
+    content = re.sub(r'\[comment\]: <> \(.*?\)', '', content)  # Remove inline comments
     content = re.sub(r'<!--.*?-->', '', content, flags=re.DOTALL)  # Remove HTML comments
     return content
 
@@ -53,7 +53,7 @@ def parse_markdown(file_path):
             author = author.lstrip('-').strip()
             parsed_data['ADR Authors'].append(author)
     
-    service_status_match = re.search(r'## Service Status\s*\n\| Service Status \|\s*\n\|---\|(?:\n\|---\|)?\s*\n\|([^\|]+)\|', content)
+    service_status_match = re.search(r'## Service Status\s*\n\|Service Status \|\s*\n\|----\|(?:\n\|----\|)?\s*\n\|([^\|]+)\|', content)
     if service_status_match:
         parsed_data['Service Status'] = service_status_match.group(1).strip()
     
@@ -73,7 +73,8 @@ def parse_markdown(file_path):
                 "Cap-Map Level 2": row[2].strip()
             })
     
-    data_classification_section = re.search(r'### 2\.2 Data Classification\s*\n\|Data Classification \| Risk Ratings\|\s*\n\|:--\|:--\|\s*\n([\s\S]*?)(?=###|$)', content)
+    # Updated regex for Data Classification section
+    data_classification_section = re.search(r'### 2\.2 Data Classification\s*\n\| Data Classification \| Risk Ratings \|\s*\n\|:--\|:--\|\s*\n([\s\S]*?)(?=###|$)', content)
     if data_classification_section:
         data_classification_rows = re.findall(r'\|([^\|]+)\|([^\|]+)\|', data_classification_section.group(1))
         for row in data_classification_rows:
@@ -81,6 +82,7 @@ def parse_markdown(file_path):
             risk_rating = row[1].strip()
             parsed_data['Data Classification'][f"DC-{classification}"] = risk_rating
     
+    # Process to prepare DataFrame
     data = {
         'Title': [parsed_data['Title']],
         'Document Owner': [', '.join(parsed_data['Document Owner'])],
@@ -102,19 +104,35 @@ def parse_markdown(file_path):
             'ADR Latest Approved Date': [parsed_data['ADR Latest Approved Date']] * len(capability_df)
         })
         df = pd.concat([main_data, capability_df], axis=1)
+    
     classification_df = pd.DataFrame([parsed_data['Data Classification']])
     if not classification_df.empty:
         df = pd.concat([df, classification_df], axis=1)
     
-    # Add dummy date value if "ADR Latest Approved Date" or "Re-certify Due Date" is missing
-    if not parsed_data['ADR Latest Approved Date'] or parsed_data['ADR Latest Approved Date'].lower() in ['tbd', 'dd-mm-yyyy']:
-        parsed_data['ADR Latest Approved Date'] = '00-00-0000'
+    # Add dummy date and check missing values
+    if parsed_data['ADR Latest Approved Date']:
+        try:
+            # Adjust for cases where the date is "TBD" or similar invalid date values
+            if parsed_data['ADR Latest Approved Date'] in ["TBD", "dd-mm-yyyy", ""]:
+                parsed_data['ADR Latest Approved Date'] = "00-00-0000"
+            
+            latest_approved_date = datetime.strptime(parsed_data['ADR Latest Approved Date'], '%d-%m-%Y')
+            recertify_due_date = latest_approved_date + relativedelta(months=10)
+            recertify_due_date_str = recertify_due_date.strftime('%d-%m-%Y')
+        except Exception as e:
+            print(f"Error while calculating Re-certify Due Date: {e}")
+            parsed_data['ADR Latest Approved Date'] = "00-00-0000"
+            recertify_due_date_str = "00-00-0000"
+        
+        # Update the DataFrame with dummy date if necessary
+        df['Re-certify Due Date'] = recertify_due_date_str
+    else:
+        parsed_data['ADR Latest Approved Date'] = "00-00-0000"
+        recertify_due_date_str = "00-00-0000"
+        df['Re-certify Due Date'] = recertify_due_date_str
     
-    if 'Re-certify Due Date' not in df.columns or df['Re-certify Due Date'].isnull().any():
-        df['Re-certify Due Date'] = '00-00-0000'
-    
-    # Check for empty columns and fill with "Check with CPA team"
-    df = df.applymap(lambda x: 'Check with CPA team' if pd.isna(x) or x == '' else x)
+    # Check for empty columns and fill them with "Check with CPA team"
+    df = df.applymap(lambda x: x if pd.notnull(x) and x != "" else "Check with CPA team")
     
     return df
 
