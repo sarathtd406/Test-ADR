@@ -10,7 +10,7 @@ def remove_comments(content):
     [comment]: <> (This is a comment)
     <!-- This is a comment -->
     """
-    content = re.sub(r'\[comment\]: <> \(.*?\)', '', content)  # Remove inline comments
+    content = re.sub(r'\[comment\]: <> \(.*?\)', '', content, flags=re.IGNORECASE)  # Remove inline comments
     content = re.sub(r'<!--.*?-->', '', content, flags=re.DOTALL)  # Remove HTML comments
     return content
 
@@ -83,7 +83,10 @@ def parse_markdown(file_path):
             parsed_data['Data Classification'][f"DC-{classification}"] = risk_rating
     
     # Extract service status
-    service_status_section = re.search(r'## Service Status\s*\n\|Service Status \|\s*\n\|----\|\s*\n\|([^\|]+)\|', content)
+    service_status_section = re.search(r'## Service Status\s*\n\| Service Status \|\s*\n\|:--\|\s*\n\|([^\|]+)\|', content)
+    print (content)
+    print(service_status_section)
+
     if service_status_section:
         parsed_data['Service Status'] = service_status_section.group(1).strip()
     
@@ -143,7 +146,7 @@ def parse_markdown(file_path):
 
 def main():
     # Specify the markdown file path
-    file_path = 'sample_markdown_file.md'  # Update with the actual file path
+    file_path = 'sample.md'  # Update with the actual file path
     
     # Check if file exists
     if not os.path.exists(file_path):
