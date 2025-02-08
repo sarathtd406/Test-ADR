@@ -32,10 +32,12 @@ def parse_markdown(file_path):
         'Data Classification': {}
     }
     
+    # Extract title
     title_match = re.search(r'^---\ntitle:\s*(.*?)\n---', content, re.DOTALL)
     if title_match:
         parsed_data['Title'] = title_match.group(1).strip()
 
+    # Extract document owner and contributors
     document_owner_match = re.search(r'## Document Owner\s*\n([\s\S]*?)(?=##|$)', content)
     if document_owner_match:
         owners = document_owner_match.group(1).strip().split('\n')
@@ -53,18 +55,16 @@ def parse_markdown(file_path):
             author = author.lstrip('-').strip()
             parsed_data['ADR Authors'].append(author)
     
-    service_status_match = re.search(r'## Service Status\s*\n\| Service Status \|\s*\n\|---\|(?:\n\|---\|)?\s*\n\|([^\|]+)\|', content)
-    if service_status_match:
-        parsed_data['Service Status'] = service_status_match.group(1).strip()
-    
+    # Extract document status and approval date
     doc_status_match = re.search(r'## Document Status\s*\n\|Document Status\|Forum\| Date \|\s*\n\|:--\|:--\|:--\|\s*\n\|([^\|]+)\|([^\|]+)\|([^\|]+)\|', content)
     if doc_status_match:
         parsed_data['ADR Latest Approved Date'] = doc_status_match.group(3).strip()
     
+    # Extract capability mapping hierarchy
     capability_mapping_section = re.search(r'## 1\. Capability Mapping Hierarchy\s*\n([\s\S]*?)(?=##|$)', content)
     if capability_mapping_section:
         capability_table_rows = re.findall(r'\|([^\|]+)\|([^\|]+)\|([^\|]+)\|', capability_mapping_section.group(1))
-        capability_table_rows = capability_table_rows[1:]
+        capability_table_rows = capability_table_rows[1:]  # Skip the header row
         capability_table_rows = [row for row in capability_table_rows if not any(":--" in col for col in row)]
         for row in capability_table_rows:
             parsed_data['Capability Mapping Hierarchy'].append({
@@ -73,7 +73,7 @@ def parse_markdown(file_path):
                 "Cap-Map Level 2": row[2].strip()
             })
     
-    # Updated regex for Data Classification section
+    # Extract data classification
     data_classification_section = re.search(r'### 2\.2 Data Classification\s*\n\| Data Classification \| Risk Ratings \|\s*\n\|:--\|:--\|\s*\n([\s\S]*?)(?=###|$)', content)
     if data_classification_section:
         data_classification_rows = re.findall(r'\|([^\|]+)\|([^\|]+)\|', data_classification_section.group(1))
@@ -82,7 +82,12 @@ def parse_markdown(file_path):
             risk_rating = row[1].strip()
             parsed_data['Data Classification'][f"DC-{classification}"] = risk_rating
     
-    # Process to prepare DataFrame
+    # Extract service status
+    service_status_section = re.search(r'## Service Status\s*\n\|Service Status \|\s*\n\|----\|\s*\n\|([^\|]+)\|', content)
+    if service_status_section:
+        parsed_data['Service Status'] = service_status_section.group(1).strip()
+    
+    # Prepare DataFrame from parsed data
     data = {
         'Title': [parsed_data['Title']],
         'Document Owner': [', '.join(parsed_data['Document Owner'])],
@@ -105,14 +110,14 @@ def parse_markdown(file_path):
         })
         df = pd.concat([main_data, capability_df], axis=1)
     
+    # Data classification
     classification_df = pd.DataFrame([parsed_data['Data Classification']])
     if not classification_df.empty:
         df = pd.concat([df, classification_df], axis=1)
     
-    # Add dummy date and check missing values
+    # Add dummy date and check for missing values
     if parsed_data['ADR Latest Approved Date']:
         try:
-            # Adjust for cases where the date is "TBD" or similar invalid date values
             if parsed_data['ADR Latest Approved Date'] in ["TBD", "dd-mm-yyyy", ""]:
                 parsed_data['ADR Latest Approved Date'] = "00-00-0000"
             
