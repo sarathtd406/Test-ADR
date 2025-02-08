@@ -107,7 +107,7 @@ def parse_markdown(file_path):
         df = pd.concat([df, classification_df], axis=1)
     
     # Add dummy date value if "ADR Latest Approved Date" or "Re-certify Due Date" is missing
-    if not parsed_data['ADR Latest Approved Date']:
+    if not parsed_data['ADR Latest Approved Date'] or parsed_data['ADR Latest Approved Date'].lower() in ['tbd', 'dd-mm-yyyy']:
         parsed_data['ADR Latest Approved Date'] = '00-00-0000'
     
     if 'Re-certify Due Date' not in df.columns or df['Re-certify Due Date'].isnull().any():
