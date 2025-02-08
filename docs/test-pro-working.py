@@ -53,7 +53,7 @@ def parse_markdown(file_path):
             author = author.lstrip('-').strip()
             parsed_data['ADR Authors'].append(author)
     
-    service_status_match = re.search(r'## Service Status\s*\n\|Service Status \|\s*\n\|----\|(?:\n\|----\|)?\s*\n\|([^\|]+)\|', content)
+    service_status_match = re.search(r'## Service Status\s*\n\| Service Status \|\s*\n\|---\|(?:\n\|---\|)?\s*\n\|([^\|]+)\|', content)
     if service_status_match:
         parsed_data['Service Status'] = service_status_match.group(1).strip()
     
