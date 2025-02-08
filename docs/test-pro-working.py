@@ -84,8 +84,6 @@ def parse_markdown(file_path):
     
     # Extract service status
     service_status_section = re.search(r'## Service Status\s*\n\| Service Status \|\s*\n\|:--\|\s*\n\|([^\|]+)\|', content)
-    print (content)
-    print(service_status_section)
 
     if service_status_section:
         parsed_data['Service Status'] = service_status_section.group(1).strip()
@@ -145,27 +143,39 @@ def parse_markdown(file_path):
     return df
 
 def main():
-    # Specify the markdown file path
-    file_path = 'sample.md'  # Update with the actual file path
+    # Specify the folder containing the markdown files
+    folder_path = 'markdown_files'  # Update with the actual folder path containing markdown files
     
-    # Check if file exists
-    if not os.path.exists(file_path):
-        print(f"Error: The file {file_path} does not exist.")
-        return
+    # List all markdown files in the folder
+    markdown_files = [f for f in os.listdir(folder_path) if f.endswith('.md')]
     
-    try:
-        # Parse the markdown file and get the DataFrame
-        df = parse_markdown(file_path)
+    # Initialize an empty list to hold dataframes from each file
+    all_dfs = []
+    
+    for file_name in markdown_files:
+        file_path = os.path.join(folder_path, file_name)
         
-        # Show the resulting dataframe (or save it to a file)
-        print(df)
+        try:
+            # Parse the markdown file and get the DataFrame
+            df = parse_markdown(file_path)
+            
+            # Append the result to the list of dataframes
+            all_dfs.append(df)
         
-        # Optionally, save to CSV
-        df.to_csv('parsed_output.csv', index=False)
-        print("Output saved to 'parsed_output.csv'")
+        except Exception as e:
+            print(f"Error while processing the file {file_name}: {e}")
     
-    except Exception as e:
-        print(f"Error while processing the markdown file: {e}")
+    # Concatenate all DataFrames into one
+    final_df = pd.concat(all_dfs, ignore_index=True)
+    
+    # Modify the DataFrame as per the requirements
+    final_df.reset_index(inplace=True, drop=True)
+    final_df.index += 1
+    final_df.index.name = "SL No."
+    
+    # Save the final dataframe to an Excel sheet
+    final_df.to_excel('parsed_output.xlsx', sheet_name='ADR', index=True)
+    print("Output saved to 'parsed_output.xlsx' with sheet name 'ADR'")
 
 # Entry point of the program
 if __name__ == "__main__":
