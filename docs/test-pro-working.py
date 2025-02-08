@@ -74,7 +74,7 @@ def parse_markdown(file_path):
             })
     
     # Extract data classification
-    data_classification_section = re.search(r'### 2\.2 Data Classification\s*\n\| Data Classification \| Risk Ratings \|\s*\n\|:--\|:--\|\s*\n([\s\S]*?)(?=###|$)', content)
+    data_classification_section = re.search(r'### 2\.2 Data Classification\s*\n\| Data Classification \| Risk Rating \|\s*\n\|:-\|:-\|\s*\n([\s\S]*?)(?=###|$)', content)
     if data_classification_section:
         data_classification_rows = re.findall(r'\|([^\|]+)\|([^\|]+)\|', data_classification_section.group(1))
         for row in data_classification_rows:
