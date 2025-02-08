@@ -147,7 +147,7 @@ def main():
     folder_path = 'sample.md'  # Update with the actual folder path containing markdown files
     
     # List all markdown files in the folder
-    markdown_files = [f for f in os.listdir(folder_path) if f.endswith('.md')]
+    markdown_files = [f for f in os.listdir(folder_path) if f.endswith('.md') and f.lower() not in ['README.md', 'template.md']]
     
     # Initialize an empty list to hold dataframes from each file
     all_dfs = []
