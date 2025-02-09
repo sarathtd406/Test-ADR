@@ -145,11 +145,22 @@ def parse_markdown(file_path):
     df['Re-certify Due Date'] = pd.to_datetime(df['Re-certify Due Date'], format='%d-%m-%Y', errors='coerce')
     
     # Replace invalid dates with dummy date
+    df['Latest Approval date'] = df['Latest Approval date'].apply(lambda x: datetime(2000, 1, 1) if pd.isnull(x) or str(x) in ["Check with CPA team", "00-00-0000"] else x)
     df['Re-certify Due Date'] = df['Re-certify Due Date'].apply(lambda x: datetime(2000, 1, 1) if pd.isnull(x) or str(x) in ["Check with CPA team", "00-00-0000"] else x)
     
     # Convert back to string in required format
     df['Latest Approval date'] = df['Latest Approval date'].dt.strftime('%d-%m-%Y')
     df['Re-certify Due Date'] = df['Re-certify Due Date'].dt.strftime('%d-%m-%Y')
+
+    # Add new columns
+    df['Re-certify Due Month'] = pd.to_datetime(df['Re-certify Due Date'], format='%d-%m-%Y', errors='coerce').dt.strftime('%b')
+    
+    # Calculate upcoming recertifications in the next 3 months
+    today = datetime.today()
+    three_months_later = today + relativedelta(months=3)
+    df['Upcoming Recertification'] = df['Re-certify Due Date'].apply(lambda x: 1 if today <= pd.to_datetime(x, format='%d-%m-%Y', errors='coerce') <= three_months_later else 0)
+    
+    return df
     
     return df
 
