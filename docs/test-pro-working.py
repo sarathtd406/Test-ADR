@@ -139,6 +139,17 @@ def parse_markdown(file_path):
     
     # Check for empty columns and fill them with "Check with CPA team"
     df = df.applymap(lambda x: x if pd.notnull(x) and x != "" else "Check with CPA team")
+
+    # Convert date columns to datetime format before saving
+    df['Latest Approval date'] = pd.to_datetime(df['Latest Approval date'], format='%d-%m-%Y', errors='coerce')
+    df['Re-certify Due Date'] = pd.to_datetime(df['Re-certify Due Date'], format='%d-%m-%Y', errors='coerce')
+    
+    # Replace invalid dates with dummy date
+    df['Re-certify Due Date'] = df['Re-certify Due Date'].apply(lambda x: datetime(2000, 1, 1) if pd.isnull(x) or str(x) in ["Check with CPA team", "00-00-0000"] else x)
+    
+    # Convert back to string in required format
+    df['Latest Approval date'] = df['Latest Approval date'].dt.strftime('%d-%m-%Y')
+    df['Re-certify Due Date'] = df['Re-certify Due Date'].dt.strftime('%d-%m-%Y')
     
     return df
 
