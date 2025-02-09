@@ -161,8 +161,6 @@ def parse_markdown(file_path):
     df['Upcoming Recertification'] = df['Re-certify Due Date'].apply(lambda x: 1 if today <= pd.to_datetime(x, format='%d-%m-%Y', errors='coerce') <= three_months_later else 0)
     
     return df
-    
-    return df
 
 def main():
     # Specify the folder containing the markdown files
