@@ -3,6 +3,7 @@ import re
 import pandas as pd
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from tabulate import tabulate
 
 def remove_comments(content):
     """
@@ -27,6 +28,7 @@ def parse_markdown(file_path):
         'Service Owner Id': [],
         'Service Status': '',
         'ADR Authors': [],
+        'ADR Document Status': '',
         'Latest Approval date': '',
         'Capability Mapping Hierarchy': [],
         'Data Classification': {}
@@ -58,6 +60,7 @@ def parse_markdown(file_path):
     # Extract document status and approval date
     doc_status_match = re.search(r'## Document Status\s*\n\| Document Status \| Forum \| Date \|\s*\n\|:--\|:--\|:--\|\s*\n\|([^\|]+)\|([^\|]+)\|([^\|]+)\|', content)
     if doc_status_match:
+        parsed_data['ADR Document Status'] = doc_status_match.group(1).strip()
         parsed_data['Latest Approval date'] = doc_status_match.group(3).strip()
     
     # Extract capability mapping hierarchy
@@ -95,6 +98,7 @@ def parse_markdown(file_path):
         'Service Owner Id': [', '.join(parsed_data['Service Owner Id'])],
         'Service Status': [parsed_data['Service Status']],
         'ADR Authors': ['; '.join(parsed_data['ADR Authors'])],
+        'ADR Document Status': [parsed_data['ADR Document Status']],
         'Latest Approval date': [parsed_data['Latest Approval date']],
     }
     
@@ -107,6 +111,7 @@ def parse_markdown(file_path):
             'Service Owner Id': [', '.join(parsed_data['Service Owner Id'])] * len(capability_df),
             'Service Status': [parsed_data['Service Status']] * len(capability_df),
             'ADR Authors': ['; '.join(parsed_data['ADR Authors'])] * len(capability_df),
+            'ADR Document Status': [parsed_data['ADR Document Status']] * len(capability_df),
             'Latest Approval date': [parsed_data['Latest Approval date']] * len(capability_df)
         })
         df = pd.concat([main_data, capability_df], axis=1)
@@ -164,10 +169,10 @@ def parse_markdown(file_path):
 
 def main():
     # Specify the folder containing the markdown files
-    folder_path = 'sample.md'  # Update with the actual folder path containing markdown files
+    folder_path = 'C:\\Users\\sarath\\TCO_APP_DEV\\foundation-adr'  # Update with the actual folder path containing markdown files
     
     # List all markdown files in the folder
-    markdown_files = [f for f in os.listdir(folder_path) if f.endswith('.md') and f.lower() not in ['README.md', 'template.md']]
+    markdown_files = [f for f in os.listdir(folder_path) if f.endswith('.md') and f.lower() not in ['README.md', 'foundational-adr-structure.md']]
     
     # Initialize an empty list to hold dataframes from each file
     all_dfs = []
@@ -194,8 +199,9 @@ def main():
     final_df.index.name = "SL No."
     
     # Save the final dataframe to an Excel sheet
-    final_df.to_excel('parsed_output.xlsx', sheet_name='ADR', index=True)
-    print("Output saved to 'parsed_output.xlsx' with sheet name 'ADR'")
+    final_df.to_excel('Governance_Data.xlsx', sheet_name='F-ADR', index=True)
+    print("Output saved to 'parsed_output.xlsx' with sheet name 'F-ADR'")
+
 
 # Entry point of the program
 if __name__ == "__main__":
