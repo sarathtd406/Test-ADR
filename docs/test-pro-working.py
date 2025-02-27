@@ -3,7 +3,6 @@ import re
 import pandas as pd
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from tabulate import tabulate
 
 def remove_comments(content):
     """
@@ -179,7 +178,7 @@ def main():
         # List all markdown files in the current folder
         if folder_path.endswith('deprecated-adr'):
             # From deprecated-adr, consider files that start with "do-not-use-f-adr-"
-            markdown_files = [f for f in os.listdir(folder_path) if f.startswith('do-not-use-f-adr-') and f.endswith('.md')]
+            markdown_files = [f for f in os.listdir(folder_path) if f.startswith('do-not-use-adr') and f.endswith('.md')]
         else:
             # For foundational-adr folder, include all markdown files
             markdown_files = [f for f in os.listdir(folder_path) if f.endswith('.md') and f.lower() not in ['README.md', 'foundational-adr-structure.md']]
