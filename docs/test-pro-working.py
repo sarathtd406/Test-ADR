@@ -168,27 +168,34 @@ def parse_markdown(file_path):
     return df
 
 def main():
-    # Specify the folder containing the markdown files
-    folder_path = 'C:\\Users\\sarath\\TCO_APP_DEV\\foundation-adr'  # Update with the actual folder path containing markdown files
-    
-    # List all markdown files in the folder
-    markdown_files = [f for f in os.listdir(folder_path) if f.endswith('.md') and f.lower() not in ['README.md', 'foundational-adr-structure.md']]
+    # List of folders containing markdown files
+    folder_paths = ['C:\\Users\\sarath\\TCO_APP_DEV\\foundational-adr', 
+                    'C:\\Users\\sarath\\TCO_APP_DEV\\deprecated-adr']  # Update with actual folder paths
     
     # Initialize an empty list to hold dataframes from each file
     all_dfs = []
     
-    for file_name in markdown_files:
-        file_path = os.path.join(folder_path, file_name)
+    for folder_path in folder_paths:
+        # List all markdown files in the current folder
+        if folder_path.endswith('deprecated-adr'):
+            # From deprecated-adr, consider files that start with "do-not-use-f-adr-"
+            markdown_files = [f for f in os.listdir(folder_path) if f.startswith('do-not-use-f-adr-') and f.endswith('.md')]
+        else:
+            # For foundational-adr folder, include all markdown files
+            markdown_files = [f for f in os.listdir(folder_path) if f.endswith('.md') and f.lower() not in ['README.md', 'foundational-adr-structure.md']]
         
-        try:
-            # Parse the markdown file and get the DataFrame
-            df = parse_markdown(file_path)
+        for file_name in markdown_files:
+            file_path = os.path.join(folder_path, file_name)
             
-            # Append the result to the list of dataframes
-            all_dfs.append(df)
-        
-        except Exception as e:
-            print(f"Error while processing the file {file_name}: {e}")
+            try:
+                # Parse the markdown file and get the DataFrame
+                df = parse_markdown(file_path)
+                
+                # Append the result to the list of dataframes
+                all_dfs.append(df)
+            
+            except Exception as e:
+                print(f"Error while processing the file {file_name}: {e}")
     
     # Concatenate all DataFrames into one
     final_df = pd.concat(all_dfs, ignore_index=True)
